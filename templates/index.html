@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0a0908">
+<title>App Cemetery</title>
+<link rel="manifest" href="/static/manifest.json">
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<div class="night">
+  <div class="moon"></div>
+  <div class="stars" id="stars"></div>
+</div>
+
+<div class="fog"></div>
+<div class="ground-line"></div>
+
+<header class="topbar">
+  <h1>APP CEMETERY</h1>
+  <p class="tagline">goodbye, old app. you served your purpose.</p>
+</header>
+
+<main id="view">
+
+  <section id="view-cemetery" class="view active">
+    <div class="flashback-banner hidden" id="flashbackBanner">
+      <span id="flashbackText"></span>
+      <button class="flashback-close" id="flashbackClose">×</button>
+    </div>
+
+    <div class="toolbar">
+      <input type="search" id="searchInput" class="search-input" placeholder="search graves...">
+      <select id="sortSelect" class="sort-select">
+        <option value="deleted_desc">newest buried</option>
+        <option value="deleted_asc">oldest buried</option>
+        <option value="name_asc">name a-z</option>
+        <option value="name_desc">name z-a</option>
+        <option value="age_desc">longest lived</option>
+        <option value="age_asc">shortest lived</option>
+        <option value="rating_desc">most mourned</option>
+        <option value="visits_desc">most visited</option>
+        <option value="category_asc">category</option>
+        <option value="cause_asc">cause of death</option>
+      </select>
+      <button id="viewToggle" class="icon-btn" title="toggle view">▦</button>
+    </div>
+
+    <div id="graveList" class="grave-grid"></div>
+
+    <button class="fab" id="addBtn">+</button>
+    <button class="random-btn" id="randomBtn">visit a random grave</button>
+  </section>
+
+  <section id="view-resurrected" class="view">
+    <h2 class="section-title">recently resurrected</h2>
+    <div id="resurrectedList" class="grave-grid"></div>
+  </section>
+
+  <section id="view-stats" class="view">
+    <h2 class="section-title">cemetery statistics</h2>
+
+    <div class="health-meter" id="healthMeter">
+      <div class="health-label">cemetery health</div>
+      <div class="health-bar-outer">
+        <div class="health-bar-inner" id="healthBar"></div>
+      </div>
+      <div class="health-score" id="healthScore">--</div>
+    </div>
+
+    <div id="statsBox" class="stats-box"></div>
+
+    <h3 class="section-title small">cause of death</h3>
+    <div class="chart-box">
+      <canvas id="causeChart"></canvas>
+    </div>
+
+    <h3 class="section-title small">categories</h3>
+    <div class="chart-box">
+      <canvas id="categoryChart"></canvas>
+    </div>
+
+    <h3 class="section-title small">timeline</h3>
+    <div id="timelineBox" class="timeline"></div>
+
+    <h3 class="section-title small">achievements</h3>
+    <div id="achievementsBox" class="achievements-box"></div>
+  </section>
+
+  <section id="view-settings" class="view">
+    <h2 class="section-title">settings</h2>
+
+    <div class="settings">
+      <p><strong>theme</strong> <button id="themeToggle" class="inline-btn">toggle day / night</button></p>
+      <p><strong>sound</strong> <button id="soundToggle" class="inline-btn">sound: on</button></p>
+      <p><strong>storage</strong> local sqlite, offline</p>
+      <p><strong>version</strong> 2.0</p>
+    </div>
+
+    <h3 class="section-title small">categories</h3>
+    <div class="settings">
+      <div class="input-row">
+        <input type="text" id="newCategoryInput" placeholder="new category name...">
+        <button type="button" class="inline-btn" id="addCategoryBtn">add</button>
+      </div>
+      <div id="categoryList" class="category-list"></div>
+    </div>
+
+    <h3 class="section-title small">data</h3>
+    <div class="settings">
+      <p><strong>backup</strong></p>
+      <div class="btn-row">
+        <button id="exportBtn" class="inline-btn">export json</button>
+        <button id="importBtn" class="inline-btn">import json</button>
+      </div>
+      <input type="file" id="importFile" accept=".json" class="hidden">
+    </div>
+
+    <h3 class="section-title small">support</h3>
+    <div class="settings">
+      <p><strong>free</strong> this app is free, forever.</p>
+      <p><strong>tip jar</strong> if you enjoy it, buy me a coffee.</p>
+      <div class="btn-row">
+        <a href="https://buymeacoffee.com/paullangpoito" target="_blank" rel="noopener" class="inline-btn support-btn">buy me a coffee</a>
+      </div>
+    </div>
+
+    <h3 class="section-title small">danger</h3>
+    <div class="settings">
+      <button class="danger" id="wipeBtn">wipe entire cemetery</button>
+    </div>
+  </section>
+
+</main>
+
+<nav class="bottom-nav">
+  <button data-view="cemetery" class="active"><span class="nav-mark">I</span><span class="nav-label">cemetery</span></button>
+  <button data-view="resurrected"><span class="nav-mark">II</span><span class="nav-label">resurrected</span></button>
+  <button data-view="stats"><span class="nav-mark">III</span><span class="nav-label">stats</span></button>
+  <button data-view="settings"><span class="nav-mark">IV</span><span class="nav-label">settings</span></button>
+</nav>
+
+<div class="modal" id="addModal">
+  <div class="modal-content">
+    <h2>bury an app</h2>
+    <form id="addForm">
+      <label>app name<input type="text" name="name" required></label>
+      <label>icon (emoji or url)<input type="text" name="icon"></label>
+      <label>category
+        <select name="category" id="categorySelect">
+        </select>
+      </label>
+      <label>installed<input type="date" name="installed"></label>
+      <label>deleted<input type="date" name="deleted"></label>
+      <label>cause of death
+        <select name="cause" id="causeSelect">
+          <option>Too many notifications</option>
+          <option>Too much storage</option>
+          <option>Phone couldn't handle it</option>
+          <option>Battery killer</option>
+          <option>Got bored</option>
+          <option>Too many ads</option>
+          <option>Never used it</option>
+          <option>Found a better app</option>
+          <option>Account problems</option>
+          <option>Too complicated</option>
+          <option>Lag</option>
+          <option>Forgot password</option>
+          <option>Subscription too expensive</option>
+          <option>Deleted by accident</option>
+          <option>Betrayed me</option>
+          <option value="__custom__">Other (custom)</option>
+        </select>
+      </label>
+      <label id="customCauseLabel" class="hidden">custom cause<input type="text" id="customCause"></label>
+
+      <label>last words
+        <div class="input-row">
+          <input type="text" name="last_words" id="lastWordsInput" placeholder="i'll reinstall it later.">
+          <button type="button" class="inline-btn" id="genLastWordsBtn">random</button>
+        </div>
+      </label>
+
+      <label>personal note<textarea name="note" rows="2"></textarea></label>
+      <label>memory<input type="text" name="memory"></label>
+
+      <label>tags (comma separated)
+        <input type="text" name="tags" placeholder="toxic, addictive, regret">
+      </label>
+
+      <label>rating
+        <div class="rating-input" id="ratingInput">
+          <span data-value="1">☠</span>
+          <span data-value="2">☠</span>
+          <span data-value="3">☠</span>
+          <span data-value="4">☠</span>
+          <span data-value="5">☠</span>
+        </div>
+        <input type="hidden" name="rating" id="ratingValue" value="0">
+      </label>
+
+      <div class="modal-actions">
+        <button type="button" class="cancel" id="cancelAdd">cancel</button>
+        <button type="submit" class="primary">bury</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="modal" id="detailModal">
+  <div class="modal-content certificate" id="certificate">
+    <div id="detailBody"></div>
+
+    <div class="notes-section no-print">
+      <h3 class="notes-title">notes & memories</h3>
+      <div id="notesList" class="notes-list"></div>
+      <div class="input-row">
+        <input type="text" id="newNoteInput" placeholder="add a note...">
+        <button type="button" class="inline-btn" id="addNoteBtn">add</button>
+      </div>
+    </div>
+
+    <div class="modal-actions no-print">
+      <button type="button" class="cancel" id="closeDetail">close</button>
+      <button type="button" class="primary" id="favoriteBtn">favorite</button>
+      <button type="button" class="primary" id="resurrectBtn">resurrect</button>
+      <button type="button" class="danger" id="deleteBtn">delete</button>
+    </div>
+    <div class="modal-actions no-print secondary-actions">
+      <button type="button" class="inline-btn" id="uploadPhotoBtn">upload photo</button>
+      <button type="button" class="inline-btn" id="shareImageBtn">share as image</button>
+      <button type="button" class="inline-btn" id="printBtn">print</button>
+    </div>
+    <input type="file" id="photoInput" accept="image/*" class="hidden">
+  </div>
+</div>
+
+<a href="https://buymeacoffee.com/paullangpoito" target="_blank" rel="noopener" class="floating-support" title="buy me a coffee">☕</a>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="/static/app.js"></script>
+</body>
+</html>
